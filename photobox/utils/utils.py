@@ -24,7 +24,7 @@ def load_domains_dict():
 
 
 def get_image_path_from_request(request, domains: dict):
-    host = request.host.split(":")[0]
+    host = request.origin.split("//")[1]
     path = domains.get(host)
     if not path:
         raise Exception(f"The domain '{host}' is not recognized in domains dictionary")
