@@ -5,8 +5,8 @@ import sys
 APP_ENV = os.environ.get('APP_ENV', 'development')
 API_PREFIX = "/api"
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOG_DIR = f"{ROOT_DIR}"
-LOG_FILE = "logs/log.txt" if APP_ENV == "development"
+LOG_DIR = "logs" if APP_ENV == "development" else "/tmp/logs/photobox"
+LOG_FILE = f"{LOG_DIR}/log.txt"
 DOMAINS_DICT_FILE = os.environ.get('DOMAINS_DICT_PATH', "domains.json")
 
 class BaseConfig:
