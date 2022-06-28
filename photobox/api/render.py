@@ -23,7 +23,7 @@ class ColorEnhanceAPI(Resource):
         image_url = json_data['url']
         logger.info(f"Got request for enhancing color, url: {image_url}, host: {host}")
         try:
-            res = Render.enhance_color(image_path, image_url)
+            res = Render.enhance_color(image_path, image_url, host)
             logger.error(f"Image color has been adjusted successfully, original url: {image_url}, final url: {res}")
             return jsonify({"url": res})
         except Exception as e:

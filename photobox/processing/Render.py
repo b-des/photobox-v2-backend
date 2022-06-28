@@ -88,13 +88,14 @@ class Render:
         return image_data.image
 
     @staticmethod
-    def enhance_color(image_path: str, url: str):
+    def enhance_color(image_path: str, url: str, host: str):
         response = requests.get(url)
         input_file = BytesIO(response.content)
         with Image.open(input_file) as image:
             image = Color.auto_contrast(image)
             filename = "color.jpg"
-            image.save(f"{image_path}/{filename}")
-            return "http://dsfdf.jpg"
+            file_path = f"{image_path}image/photobox/uploads/{filename}"
+            image.save(file_path)
+            return file_path
 
 
