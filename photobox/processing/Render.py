@@ -1,7 +1,9 @@
 import logging
+import os
 from io import BytesIO
 import requests
 from PIL import Image
+from urllib.parse import urlparse
 
 from photobox import config
 from photobox.processing.Color import Color
@@ -93,9 +95,11 @@ class Render:
         input_file = BytesIO(response.content)
         with Image.open(input_file) as image:
             image = Color.auto_contrast(image)
-            filename = "color.jpg"
-            file_path = f"{image_path}image/photobox/uploads/{filename}"
+
+            filename = os.path.basename(url)
+            relative_path = "image/photobox/uploads/"
+            file_path = f"{image_path}{relative_path}{filename}"
             image.save(file_path)
-            return file_path
+            return f"/{relative_path}{filename}"
 
 
