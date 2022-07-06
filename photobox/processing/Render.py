@@ -1,3 +1,4 @@
+import io
 import logging
 import os
 import random
@@ -36,34 +37,40 @@ class Render:
         logger.info(f"All images have been processed: {len(self.images)}")
 
     def process(self, image_data: ImagePayload):
+        image_data.image = self.open_image(image_data.src.full)
+        # adjust image color
+        image_data.image = self.adjust_color(image_data)
+        image_data.image = self.resize(image_data)
+        image_data.image = self.draw_border(image_data)
+
+        original_filename = os.path.basename(image_data.src.full)
+        salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+        file = f"{original_filename}-{salt}-{image_data.size.width}-{image_data.size.height}.jpg"
+
+        path = os.path.join(self.os_path, image_data.target_path)
+        file_path = os.path.join(path, file)
+
+        logger.info(f"Save image as {file_path}")
+        if not os.path.exists(path):
+            logger.info(f"Path doesn't exist, creating one: {path}")
+            os.makedirs(path)
+        image_data.image.save(file_path, "JPEG", dpi=(600, 600))
+
+    def open_image(self, src):
         if config.APP_ENV == "development":
-            logger.info(f"Read file from url: {image_data.src.full}")
-            response = requests.get(image_data.src.full)
+            logger.info(f"Read file from url: {src}")
+            response = requests.get(src)
             input_file = BytesIO(response.content)
+            with Image.open(input_file) as image:
+                return image
         else:
             logger.info(f"OS PATH: {self.os_path}")
-            image_path = urlparse(image_data.src.full).path
-            input_file = os.path.join("/var/www/demonstration/data/www/pechat.photo", image_path)
+            file_path = urlparse(src).path.strip("/")
+            input_file = os.path.join(self.os_path, file_path)
             logger.info(f"Read file from path: {input_file}")
-        with Image.open(input_file) as image:
-            image_data.image = image
-            # adjust image color
-            image_data.image = self.adjust_color(image_data)
-            image_data.image = self.resize(image_data)
-            image_data.image = self.draw_border(image_data)
-
-            original_filename = os.path.basename(image_data.src.full)
-            salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
-            file = f"{original_filename}-{salt}-{image_data.size.width}-{image_data.size.height}.jpg"
-
-            path = os.path.join(self.os_path, image_data.target_path)
-            file_path = os.path.join(path, file)
-
-            logger.info(f"Save image as {file_path}")
-            if not os.path.exists(path):
-                logger.info(f"Path doesn't exist, creating one: {path}")
-                os.makedirs(path)
-            image_data.image.save(file_path, "JPEG", dpi=(600, 600))
+            with open(input_file, "rb") as f:
+                b = io.BytesIO(f.read())
+                return Image.open(b)
 
     @staticmethod
     def adjust_color(image_data: ImagePayload):
