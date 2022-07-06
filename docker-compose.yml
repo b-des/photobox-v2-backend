@@ -3,7 +3,7 @@ version: '3.7'
 services:
   backend:
     build: .
-    command: gunicorn --bind 0.0.0.0:6000 wsgi:app workers 8 --threads 8 -k gthread --timeout 10
+    command: gunicorn --bind 0.0.0.0:6000 wsgi:app workers 4 --threads 4 -k gthread --timeout 10
     restart: always
     environment:
       - DOMAINS_DICT_PATH=${DOMAINS_DICT_PATH}

@@ -1,4 +1,5 @@
 from PIL import Image, ImageFilter
+from flask import Request
 
 from photobox import config
 
@@ -23,7 +24,7 @@ def load_domains_dict():
     return data
 
 
-def get_image_path_from_request(request, domains: dict):
+def get_image_path_from_request(request: Request, domains: dict):
     host = request.origin.split("//")[1]
     path = domains.get(host)
     if not path:

@@ -1,24 +1,25 @@
 import logging
 import os
+import random
+import string
 from io import BytesIO
+
 import requests
 from PIL import Image
-from urllib.parse import urlparse
 
-from photobox import config
-from photobox.processing.Color import Color
-from photobox.processing.Cropper import Cropper
-from photobox.processing.Frame import Frame
 from photobox.models.FrameType import FrameType
 from photobox.models.ImagePayload import ImagePayload
 from photobox.models.PrintMode import PrintMode
+from photobox.processing.Color import Color
+from photobox.processing.Cropper import Cropper
+from photobox.processing.Frame import Frame
 
 logger = logging.getLogger()
 
 
 class Render:
-    def __init__(self, images: [ImagePayload], image_path: str):
-        self.image_path = image_path
+    def __init__(self, images: [ImagePayload], os_path: str):
+        self.os_path = os_path
         self.images = images
 
     def start(self):
@@ -26,6 +27,8 @@ class Render:
             logger.info(f"Processing image {i + 1}/{len(self.images)}...")
             self.process(item)
             logger.info(f"Image {i + 1}/{len(self.images)} processed")
+
+        logger.info(f"All images have been processed: {len(self.images)}")
 
     def process(self, image_data: ImagePayload):
         response = requests.get(image_data.src.full)
@@ -36,9 +39,19 @@ class Render:
             image_data.image = self.adjust_color(image_data)
             image_data.image = self.resize(image_data)
             image_data.image = self.draw_border(image_data)
-            final_path = f"{self.image_path}/res.jpg"
-            logger.info(f"Save image as {final_path}")
-            image_data.image.save(f"{final_path}")
+
+            original_filename = os.path.basename(image_data.src.full)
+            salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+            file = f"{original_filename}-{salt}-{image_data.size.width}-{image_data.size.height}.jpg"
+
+            path = os.path.join(self.os_path, image_data.target_path)
+            file_path = os.path.join(path, file)
+
+            logger.info(f"Save image as {file_path}")
+            if not os.path.exists(path):
+                logger.info(f"Path doesn't exist, creating one: {path}")
+                os.makedirs(path)
+            image_data.image.save(file_path, "JPEG", dpi=(600, 600))
 
     @staticmethod
     def adjust_color(image_data: ImagePayload):
@@ -52,7 +65,7 @@ class Render:
     def resize(image_data: ImagePayload):
         logger.info(f"Resize image according to format. Mode: {image_data.image_print_mode}, "
                     f"format: {image_data.size}, "
-                    f"crop data: {image_data.crop_data}, "
+                    f"crop data: {image_data.crop_data_for_render}, "
                     f"fill background: {image_data.detect_and_fill_with_gradient}, rotation: {image_data.rotate}")
         # fit to container if full mode has been chosen
         if image_data.image_print_mode == PrintMode.FULL:
@@ -67,8 +80,8 @@ class Render:
         if image_data.image_print_mode == PrintMode.CROP:
             # if crop models is present
             # crop using it, otherwise perform auto crop
-            if image_data.crop_data:
-                return Cropper.crop(image_data.image, image_data.crop_data)
+            if image_data.crop_data_for_render:
+                return Cropper.crop(image_data.image, image_data.crop_data_for_render)
             else:
                 return Cropper.auto_crop_best_frame(image_data.image, image_data.size)
 
@@ -90,7 +103,7 @@ class Render:
         return image_data.image
 
     @staticmethod
-    def enhance_color(image_path: str, url: str, host: str):
+    def enhance_color(os_path: str, url: str):
         response = requests.get(url)
         input_file = BytesIO(response.content)
         with Image.open(input_file) as image:
@@ -98,7 +111,7 @@ class Render:
 
             filename = os.path.basename(url)
             relative_path = "image/photobox/uploads/"
-            file_path = f"{image_path}{relative_path}{filename}"
+            file_path = f"{os_path}{relative_path}{filename}"
             image.save(file_path)
             return f"/{relative_path}{filename}"
 

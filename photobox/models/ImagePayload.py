@@ -19,10 +19,11 @@ class ImagePayload:
     auto_color_enhance: bool
     autoDetect_best_frame: bool
     color_adjustment: ColorSettings
-    crop_data: Area
+    crop_data_for_render: Area
     detect_and_fill_with_gradient: bool
     frame: FrameOptions
     image_print_mode: PrintMode
+    target_path: str
     quantity: int
     rotate: int
     size: Size
