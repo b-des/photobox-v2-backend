@@ -27,7 +27,10 @@ class Render:
     def start(self):
         for i, item in enumerate(self.images):
             logger.info(f"Processing image {i + 1}/{len(self.images)}...")
-            self.process(item)
+            try:
+                self.process(item)
+            except Exception as e:
+                logger.error(f"Exception during rendering images: {e}")
             logger.info(f"Image {i + 1}/{len(self.images)} processed")
 
         logger.info(f"All images have been processed: {len(self.images)}")
