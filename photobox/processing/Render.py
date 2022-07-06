@@ -3,10 +3,12 @@ import os
 import random
 import string
 from io import BytesIO
+from urllib.parse import urlparse
 
 import requests
 from PIL import Image
 
+from photobox import config
 from photobox.models.FrameType import FrameType
 from photobox.models.ImagePayload import ImagePayload
 from photobox.models.PrintMode import PrintMode
@@ -31,8 +33,13 @@ class Render:
         logger.info(f"All images have been processed: {len(self.images)}")
 
     def process(self, image_data: ImagePayload):
-        response = requests.get(image_data.src.full)
-        input_file = BytesIO(response.content)
+        if config.APP_ENV == "development":
+            logger.info(f"Read file from url: {image_data.src.full}")
+            response = requests.get(image_data.src.full)
+            input_file = BytesIO(response.content)
+        else:
+            input_file = os.path.join(self.os_path, urlparse(image_data.src.full).path)
+            logger.info(f"Read file from path: {input_file}")
         with Image.open(input_file) as image:
             image_data.image = image
             # adjust image color
@@ -81,7 +88,7 @@ class Render:
             # if crop data is present
             # crop using it, otherwise perform auto crop
             if image_data.crop_data_for_render:
-                return Cropper.crop(image_data.image, image_data.crop_data_for_render)
+                return Cropper.crop(image_data.image, image_data.crop_data_for_render, image_data.size)
             else:
                 return Cropper.auto_crop_best_frame(image_data.image, image_data.size)
 

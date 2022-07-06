@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image, ImageDraw, ImageOps, ImageEnhance, ImageFilter
 import requests
 from io import BytesIO
@@ -11,7 +13,7 @@ from photobox.processing.Cropper import Cropper
 from photobox.processing.Frame import FrameOptions
 from photobox.utils import to_pixel
 from photobox.models.ImagePayload import ImagePayload
-
+from urllib.parse import urlparse
 
 def print_hi(name):
     json = '[{"colorAdjustment":{"saturation":0,"brightness":1,"contrast":1},"cropData":{"x":141.68524590163935,"y":0,"width":225.62950819672133,"height":339,"rotate":0},"canvasData":null,"detectAndFillWithGradient":false,"frame":{"color":"#ffffff","thickness":5,"type":"solid"},"imagePrintMode":"FULL","selectedOptions":[{"option_id":"9","option_value_id":"20","checked":true},{"option_id":"11","option_value_id":"32","checked":true},{"option_id":"79","option_value_id":"329","checked":true},{"option_id":"82","option_value_id":"341","checked":true}],"quantity":1,"rotate":0,"size":{"height":152,"width":102},"src":{"thumbnail":"./img/1-thumbnail.jpg","full":"./img/1-thumbnail.jpg","adjusted":"./img/1-thumbnail.jpg"},"zoom":0,"autoColorEnhance":false,"autoDetectBestFrame":true,"resolution":"400x500"},{"colorAdjustment":{"saturation":1,"brightness":1.2,"contrast":1},"cropData":{"x":72,"y":24,"width":21,"height":32,"rotate":0},"canvasData":null,"detectAndFillWithGradient":false,"frame":{"color":"#ffffff","thickness":5,"type":"solid"},"imagePrintMode":"FULL","selectedOptions":[{"option_id":"9","option_value_id":"20","checked":true},{"option_id":"11","option_value_id":"32","checked":true},{"option_id":"79","option_value_id":"329","checked":true},{"option_id":"82","option_value_id":"341","checked":true}],"quantity":1,"rotate":0,"size":{"height":152,"width":102},"src":{"thumbnail":"./img/Mona_Lisa-restored.jpg","full":"./img/Mona_Lisa-restored.jpg","adjusted":"./img/Mona_Lisa-restored.jpg"},"zoom":0,"autoColorEnhance":false,"autoDetectBestFrame":true,"resolution":"400x500"},{"colorAdjustment":{"saturation":1,"brightness":1,"contrast":1},"cropData":{"x":72,"y":24,"width":21,"height":32,"rotate":0},"canvasData":{"left":-200.87479500000018,"top":-19.741445000000105,"width":409.8747950000002,"height":272.9814450000001,"naturalWidth":509,"naturalHeight":339},"detectAndFillWithGradient":false,"frame":{"color":"#ffffff","type":"none","thickness":5},"imagePrintMode":"CROP","selectedOptions":[],"quantity":1,"rotate":0,"size":{"height":9,"width":9},"src":{"thumbnail":"./img/1-thumbnail.jpg"},"zoom":0.8052550000000004,"autoColorEnhance":false,"autoDetectBestFrame":false,"resolution":"5120x2880"},{"colorAdjustment":{"saturation":1,"brightness":1,"contrast":1},"cropData":{"x":31,"y":0,"width":67,"height":100,"rotate":0},"canvasData":null,"detectAndFillWithGradient":false,"frame":{"color":"#ffffff","type":"none","thickness":5},"imagePrintMode":"CROP","selectedOptions":[],"quantity":1,"rotate":0,"size":{"height":9,"width":9},"src":{"thumbnail":"./img/1-thumbnail.jpg","full":"./img/1-thumbnail.jpg"},"zoom":0,"autoColorEnhance":false,"autoDetectBestFrame":true,"resolution":null}]'
@@ -177,6 +179,8 @@ def draw_polaroid_frame(img: Image, color: str = "white"):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    #print_hi('PyCharm')
+    url = "https://pechat.photo/image/customer/authorized/13fe9d84310e77f13a6d184dbf1232f3/d46b69a8f3d536eccb784bcafcc3cb35.jpg"
+    print(urlparse(url).path)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

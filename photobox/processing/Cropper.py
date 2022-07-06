@@ -9,16 +9,17 @@ from photobox.models.Size import Size
 class Cropper:
 
     @staticmethod
-    def crop(image: Image, crop_data: Area):
+    def crop(image: Image, crop_data: Area, size: Size):
 
         x, y, w, h = round(crop_data.x), round(crop_data.y), round(crop_data.width), round(crop_data.height)
 
+        # transform percent to pixels
         w = round(image.width / 100 * (w + x))
         h = round(image.height / 100 * (h + y))
         x = round(image.width / 100 * x)
         y = round(image.height / 100 * y)
         image = image.crop((x, y, w, h))
-        return image
+        return Cropper.resize(image, size)
 
     @staticmethod
     def resize(image: Image, size: Size):
@@ -30,7 +31,12 @@ class Cropper:
         width = utils.to_pixel(size.width, multiplier)
         height = utils.to_pixel(size.height, multiplier)
 
-        image = image.resize((width, height))
+        #image = image.resize((height, width))
+        # resize image by largest side keeping aspect ratio
+        if image.width > image.height:
+            image = image.resize((height, width))
+        else:
+            image = image.resize((width, height))
         return image
 
     @staticmethod
@@ -44,7 +50,7 @@ class Cropper:
         x, y, width, height = result['top_crop']['x'], result['top_crop']['y'], \
                               result['top_crop']['width'], result['top_crop']['height']
 
-        return image.crop((x, y, x + width, y + height))
+        return Cropper.resize(image.crop((x, y, x + width, y + height)), size)
 
     @staticmethod
     def fit_to_container(image: Image, size: Size, fill_white_space: bool = False, rotate: bool = False):
