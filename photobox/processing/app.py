@@ -34,6 +34,7 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # register flask restfull endpoints
 api.render.register(app)
+api.health.register(app)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=4567)
