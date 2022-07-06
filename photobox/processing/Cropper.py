@@ -36,7 +36,11 @@ class Cropper:
     @staticmethod
     def auto_crop_best_frame(image: Image, size: Size):
         sc = smartcrop.SmartCrop()
-        result = sc.crop(image, size.width, size.height)
+        # switch to horizontal mode in case when image width bigger than image height
+        if image.width > image.height:
+            result = sc.crop(image, size.height, size.width)
+        else:
+            result = sc.crop(image, size.width, size.height)
         x, y, width, height = result['top_crop']['x'], result['top_crop']['y'], \
                               result['top_crop']['width'], result['top_crop']['height']
 
@@ -47,10 +51,10 @@ class Cropper:
         width = utils.to_pixel(size.width, 5)
         height = utils.to_pixel(size.height, 5)
 
-        if image.width / image.height > 1 and not rotate:
+        if image.width > image.height and not rotate:
             image = image.transpose(Image.Transpose.ROTATE_270)
 
-        if rotate and image.width / image.height < 1:
+        if rotate:
             image = image.transpose(Image.Transpose.ROTATE_270)
 
         # resize image by largest side keeping aspect ratio

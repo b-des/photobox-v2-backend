@@ -78,7 +78,7 @@ class Render:
 
         # crop image
         if image_data.image_print_mode == PrintMode.CROP:
-            # if crop models is present
+            # if crop data is present
             # crop using it, otherwise perform auto crop
             if image_data.crop_data_for_render:
                 return Cropper.crop(image_data.image, image_data.crop_data_for_render)
