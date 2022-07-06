@@ -42,7 +42,7 @@ class Render:
             input_file = BytesIO(response.content)
         else:
             logger.info(f"OS PATH: {self.os_path}")
-            input_file = os.path.join(self.os_path, urlparse(image_data.src.full).path)
+            input_file = os.path.join("/var/www/demonstration/data/www/pechat.photo/", urlparse(image_data.src.full).path)
             logger.info(f"Read file from path: {input_file}")
         with Image.open(input_file) as image:
             image_data.image = image
