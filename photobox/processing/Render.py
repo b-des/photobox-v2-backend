@@ -31,7 +31,7 @@ class Render:
             try:
                 self.process(item)
             except Exception as e:
-                logger.error(f"Exception during rendering images: {e}", e)
+                logger.error(f"Exception during rendering image: {item.src.full}, message: {e}", e)
             logger.info(f"Image {i + 1}/{len(self.images)} processed")
 
         logger.info(f"All images have been processed: {len(self.images)}")
