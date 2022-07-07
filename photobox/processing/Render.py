@@ -31,13 +31,16 @@ class Render:
             try:
                 self.process(item)
             except Exception as e:
-                logger.error(f"Exception during rendering images: {e}")
+                logger.error(f"Exception during rendering images: {e}", e)
             logger.info(f"Image {i + 1}/{len(self.images)} processed")
 
         logger.info(f"All images have been processed: {len(self.images)}")
 
     def process(self, image_data: ImagePayload):
         image_data.image = self.open_image(image_data.src.full)
+        if image_data.image.mode != "RGB":
+            logger.info(f"Image mode is {image_data.image.mode}, converting to RGB");
+            image_data.image = image_data.image.convert('RGB')
         # adjust image color
         image_data.image = self.adjust_color(image_data)
         image_data.image = self.resize(image_data)
@@ -106,6 +109,7 @@ class Render:
     @staticmethod
     def draw_border(image_data: ImagePayload):
         frame = image_data.frame
+        print(image_data.image.mode)
         logger.info(f"Draw border, type: {frame.type}, color: {frame.color}, width: {frame.thickness}")
         if frame.type == FrameType.SOLID:
             return Frame.draw_solid_border(image_data.image, frame)
