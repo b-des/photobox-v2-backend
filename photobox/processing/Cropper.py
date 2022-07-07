@@ -11,7 +11,7 @@ class Cropper:
     @staticmethod
     def crop(image: Image, crop_data: Area, size: Size):
 
-        x, y, w, h = round(crop_data.x), round(crop_data.y), round(crop_data.width), round(crop_data.height)
+        x, y, w, h = crop_data.x, crop_data.y, crop_data.width, crop_data.height
 
         # transform percent to pixels
         w = round(image.width / 100 * (w + x))

@@ -61,16 +61,15 @@ class Render:
             logger.info(f"Read file from url: {src}")
             response = requests.get(src)
             input_file = BytesIO(response.content)
-            with Image.open(input_file) as image:
-                return image
+            return Image.open(input_file)
         else:
             logger.info(f"OS PATH: {self.os_path}")
             file_path = urlparse(src).path.strip("/")
             input_file = os.path.join(self.os_path, file_path)
             logger.info(f"Read file from path: {input_file}")
-            with open(input_file, "rb") as f:
-                b = io.BytesIO(f.read())
-                return Image.open(b)
+            f = open(input_file, "rb")
+            b = io.BytesIO(f.read())
+            return Image.open(b)
 
     @staticmethod
     def adjust_color(image_data: ImagePayload):
