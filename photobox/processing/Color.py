@@ -7,7 +7,7 @@ class Color:
 
     @staticmethod
     def auto_contrast(img: Image):
-        return ImageOps.autocontrast(img, cutoff=5, ignore=0)
+        return ImageOps.autocontrast(img, cutoff=3, ignore=0)
 
     @staticmethod
     def adjust_color(img: Image, params: ColorSettings):
