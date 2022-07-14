@@ -82,16 +82,18 @@ class Frame:
         offset = 100
         width = utils.to_pixel(1, 2)
         width = int(image.height / 100 * 2)
-        bottom_rectangle_height = width * 2
-
+        thickness = utils.to_pixel(5)
+        bottom_rectangle_height = thickness * 3
         # bottom line
         draw.rectangle(
-            ((offset, image.height - offset - bottom_rectangle_height * 2), (image.width - offset, image.height - offset)),
+            ((0, image.height - bottom_rectangle_height), (image.width, image.height)),
             fill=color)
 
         # general polaroid frame
-        draw.rectangle(((offset, offset), (image.width - offset, image.height - offset)),
-                       outline=color, fill=(255, 255, 255, 0), width=width)
-        image = image.crop((offset, offset, image.width - offset, image.height - offset))
+       # draw.rectangle(((offset, offset), (image.width - offset, image.height - offset)),
+       #                outline=color, fill=(255, 255, 255, 0), width=width)
+       # image = image.crop((offset, offset, image.width - offset, image.height - offset))
+
+        image = ImageOps.expand(image, border=thickness, fill=color)
         return image
 
