@@ -59,16 +59,17 @@ class Render:
             os.makedirs(path)
         image_data.image.save(file_path, "JPEG", dpi=(600, 600))
 
-    def open_image(self, src):
+    @staticmethod
+    def open_image(full_path, src):
         if config.APP_ENV == "development":
             logger.info(f"Read file from url: {src}")
             response = requests.get(src)
             input_file = BytesIO(response.content)
             return Image.open(input_file)
         else:
-            logger.info(f"OS PATH: {self.os_path}")
+            logger.info(f"OS PATH: {full_path}")
             file_path = urlparse(src).path.strip("/")
-            input_file = os.path.join(self.os_path, file_path)
+            input_file = os.path.join(full_path, file_path)
             logger.info(f"Read file from path: {input_file}")
             f = open(input_file, "rb")
             b = io.BytesIO(f.read())
@@ -126,15 +127,12 @@ class Render:
 
     @staticmethod
     def enhance_color(os_path: str, url: str):
-        response = requests.get(url)
-        input_file = BytesIO(response.content)
-        with Image.open(input_file) as image:
-            image = Color.auto_contrast(image)
-
-            filename = os.path.basename(url)
-            relative_path = "image/photobox/uploads/"
-            file_path = f"{os_path}{relative_path}{filename}"
-            image.save(file_path)
-            return f"/{relative_path}{filename}"
+        image = Render.open_image(os_path, url)
+        image = Color.auto_contrast(image)
+        filename = os.path.basename(url)
+        relative_path = "image/photobox/uploads/"
+        file_path = f"{os_path}{relative_path}{filename}"
+        image.save(file_path)
+        return f"/{relative_path}{filename}"
 
 
