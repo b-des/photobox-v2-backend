@@ -37,7 +37,7 @@ class Render:
         logger.info(f"All images have been processed: {len(self.images)}")
 
     def process(self, image_data: ImagePayload):
-        image_data.image = self.open_image(image_data.src.full)
+        image_data.image = self.open_image(self.os_path, image_data.src.full)
         if image_data.image.mode != "RGB":
             logger.info(f"Image mode is {image_data.image.mode}, converting to RGB");
             image_data.image = image_data.image.convert('RGB')
