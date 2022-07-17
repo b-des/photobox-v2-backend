@@ -8,8 +8,8 @@ class Frame:
     @staticmethod
     def draw_solid_border(image: Image, frame: FrameOptions):
         thickness = utils.to_pixel(frame.thickness)
-        img = ImageOps.expand(image, border=thickness, fill=frame.color)
-        return img
+        image = ImageOps.expand(image, border=thickness, fill=frame.color)
+        return image
 
     @staticmethod
     def draw_lumber_frame(image: Image, color: str = "white"):

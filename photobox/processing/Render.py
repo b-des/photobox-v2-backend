@@ -39,7 +39,7 @@ class Render:
     def process(self, image_data: ImagePayload):
         image_data.image = self.open_image(self.os_path, image_data.src.full)
         if image_data.image.mode != "RGB":
-            logger.info(f"Image mode is {image_data.image.mode}, converting to RGB");
+            logger.info(f"Image mode is {image_data.image.mode}, converting to RGB")
             image_data.image = image_data.image.convert('RGB')
         # adjust image color
         image_data.image = self.adjust_color(image_data)
@@ -57,7 +57,7 @@ class Render:
         if not os.path.exists(path):
             logger.info(f"Path doesn't exist, creating one: {path}")
             os.makedirs(path)
-        image_data.image.save(file_path, "JPEG", dpi=(600, 600))
+        image_data.image.convert("RGB").save(file_path, "JPEG", dpi=(600, 600))
 
     @staticmethod
     def open_image(full_path, src):
@@ -91,12 +91,7 @@ class Render:
                     f"fill background: {image_data.detect_and_fill_with_gradient}, rotation: {image_data.rotate}")
         # fit to container if full mode has been chosen
         if image_data.image_print_mode == PrintMode.FULL:
-            return Cropper.fit_to_container(
-                image_data.image,
-                image_data.size,
-                image_data.detect_and_fill_with_gradient,
-                bool(image_data.rotate)
-            )
+            return Cropper.fit_to_container(image_data)
 
         # crop image
         if image_data.image_print_mode == PrintMode.CROP:
