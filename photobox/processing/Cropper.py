@@ -11,26 +11,22 @@ class Cropper:
 
     @staticmethod
     def crop(image: Image, crop_data: Area, size: Size):
-
         x, y, w, h = crop_data.x, crop_data.y, crop_data.width, crop_data.height
 
-        # transform percent to pixels
+        # transform percents to pixels
         w = round(image.width / 100 * (w + x))
         h = round(image.height / 100 * (h + y))
         x = round(image.width / 100 * x)
         y = round(image.height / 100 * y)
+
         image = image.crop((x, y, w, h))
-        return Cropper.resize(image, size)
+        image = Cropper.resize(image, size)
+        return image
 
     @staticmethod
     def resize(image: Image, size: Size):
-        if min(int(size.width), int(size.height)) > 300:
-            multiplier = 2
-        else:
-            multiplier = 5
-
-        width = utils.to_pixel(size.width, multiplier)
-        height = utils.to_pixel(size.height, multiplier)
+        width = utils.to_pixel(size.width)
+        height = utils.to_pixel(size.height)
 
         # resize image by largest side keeping aspect ratio
         if image.width > image.height:

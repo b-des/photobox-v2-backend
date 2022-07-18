@@ -6,9 +6,17 @@ from photobox.models.FrameOptions import FrameOptions
 
 class Frame:
     @staticmethod
-    def draw_solid_border(image: Image, frame: FrameOptions):
+    def draw_solid_border(image: Image, frame: FrameOptions, is_crop_mode=False):
         thickness = utils.to_pixel(frame.thickness)
-        image = ImageOps.expand(image, border=thickness, fill=frame.color)
+        # draw border using rectangles inside image
+        if is_crop_mode:
+            draw = ImageDraw.Draw(image, "RGBA")
+            draw.rectangle(((0, 0), (thickness, image.height)), fill=frame.color)
+            draw.rectangle(((0, 0), (image.width, thickness)), fill=frame.color)
+            draw.rectangle(((image.width, 0), (image.width - thickness, image.height)), fill=frame.color)
+            draw.rectangle(((0, image.height), (image.width, image.height - thickness)), fill=frame.color)
+        else:  # if mode is FULL - draw border outside image
+            image = ImageOps.expand(image, border=thickness, fill=frame.color)
         return image
 
     @staticmethod
@@ -61,11 +69,13 @@ class Frame:
 
         # bottom-right corner
         # right line
-        draw.line([(image.width - offset, image.height - offset), (image.width - offset, image.height - offset - length)],
-                  fill=color, width=width)
+        draw.line(
+            [(image.width - offset, image.height - offset), (image.width - offset, image.height - offset - length)],
+            fill=color, width=width)
         # bottom line
-        draw.line([(image.width - offset, image.height - offset), (image.width - offset - length, image.height - offset)],
-                  fill=color, width=width)
+        draw.line(
+            [(image.width - offset, image.height - offset), (image.width - offset - length, image.height - offset)],
+            fill=color, width=width)
 
         # bottom-left corner
         # left line
@@ -76,24 +86,17 @@ class Frame:
         return image
 
     @staticmethod
-    def draw_polaroid_frame(image: Image, color: str = "white"):
+    def draw_polaroid_frame(image: Image, frame: FrameOptions, is_crop_mode=False):
+        thickness = utils.to_pixel(frame.thickness)
+        bottom_rectangle_height = thickness * 3
+
         # create draw image
         draw = ImageDraw.Draw(image, "RGBA")
-        offset = 100
-        width = utils.to_pixel(1, 2)
-        width = int(image.height / 100 * 2)
-        thickness = utils.to_pixel(5)
-        bottom_rectangle_height = thickness * 3
         # bottom line
         draw.rectangle(
             ((0, image.height - bottom_rectangle_height), (image.width, image.height)),
-            fill=color)
+            fill=frame.color)
 
         # general polaroid frame
-       # draw.rectangle(((offset, offset), (image.width - offset, image.height - offset)),
-       #                outline=color, fill=(255, 255, 255, 0), width=width)
-       # image = image.crop((offset, offset, image.width - offset, image.height - offset))
-
-        image = ImageOps.expand(image, border=thickness, fill=color)
+        image = Frame.draw_solid_border(image, frame, is_crop_mode)
         return image
-

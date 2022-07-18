@@ -38,6 +38,7 @@ class Render:
 
     def process(self, image_data: ImagePayload):
         image_data.image = self.open_image(self.os_path, image_data.src.full)
+        #original_aspect = image_data.size.height / image_data.size.width
         if image_data.image.mode != "RGB":
             logger.info(f"Image mode is {image_data.image.mode}, converting to RGB")
             image_data.image = image_data.image.convert('RGB')
@@ -54,6 +55,7 @@ class Render:
         file_path = os.path.join(path, file)
 
         logger.info(f"Save image as {file_path}")
+        #logger.info(f"Aspect ratio of the final image is: {   image_data.image.height / image_data.image.width}, required: {original_aspect}")
         if not os.path.exists(path):
             logger.info(f"Path doesn't exist, creating one: {path}")
             os.makedirs(path)
@@ -105,10 +107,10 @@ class Render:
     @staticmethod
     def draw_border(image_data: ImagePayload):
         frame = image_data.frame
-        print(image_data.image.mode)
         logger.info(f"Draw border, type: {frame.type}, color: {frame.color}, width: {frame.thickness}")
+        is_crop_mode = image_data.image_print_mode == PrintMode.CROP
         if frame.type == FrameType.SOLID:
-            return Frame.draw_solid_border(image_data.image, frame)
+            return Frame.draw_solid_border(image_data.image, frame, is_crop_mode)
         elif frame.type == FrameType.ZEBRA:
             return Frame.draw_zebra_frame(image_data.image, frame.color)
         elif frame.type == FrameType.HOOK:
@@ -116,7 +118,7 @@ class Render:
         elif frame.type == FrameType.LUMBER:
             return Frame.draw_lumber_frame(image_data.image, frame.color)
         elif frame.type == FrameType.POLAROID:
-            return Frame.draw_polaroid_frame(image_data.image, frame.color)
+            return Frame.draw_polaroid_frame(image_data.image, frame, is_crop_mode)
 
         return image_data.image
 
