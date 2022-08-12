@@ -84,7 +84,6 @@ class Render:
             input_file = BytesIO(response.content)
             return Image.open(input_file)
         else:
-            logger.info(f"OS PATH: {full_path}")
             file_path = urlparse(src).path.strip("/")
             input_file = os.path.join(full_path, file_path)
             logger.info(f"Read file from path: {input_file}")
