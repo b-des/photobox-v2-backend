@@ -34,7 +34,7 @@ class Render:
                 total_image_copies += item.quantity
             try:
                 self.process(item)
-                logger.info(f"Image {i + 1}/{len(self.images)} processed")
+                logger.info(f"====Image {i + 1}/{len(self.images)} processed====")
             except Exception as e:
                 logger.error(f"Exception during rendering image: {item.src.full}, message: {e}", e)
 
@@ -75,7 +75,6 @@ class Render:
             logger.info(f"Path doesn't exist, creating it: {path}")
             os.makedirs(path)
         image_data.image.convert("RGB").save(file_path, "JPEG", dpi=(600, 600), quality=100)
-        logger.info("====Image saved====")
 
     @staticmethod
     def open_image(full_path, src):
