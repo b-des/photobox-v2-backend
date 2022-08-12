@@ -51,7 +51,7 @@ class Render:
         image_data.image = self.resize(image_data)
         image_data.image = self.draw_border(image_data)
 
-        for i in range(2):
+        for i in range(image_data.quantity):
             self.save_image(image_data, i)
 
     def save_image(self, image_data, copy):
