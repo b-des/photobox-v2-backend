@@ -75,6 +75,7 @@ class Render:
             logger.info(f"Path doesn't exist, creating it: {path}")
             os.makedirs(path)
         image_data.image.convert("RGB").save(file_path, "JPEG", dpi=(600, 600))
+        logger.info("====Image saved====")
 
     @staticmethod
     def open_image(full_path, src):
