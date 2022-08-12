@@ -10,6 +10,7 @@ import requests
 from PIL import Image
 
 from photobox import config
+from photobox.models.Area import Area
 from photobox.models.FrameType import FrameType
 from photobox.models.ImagePayload import ImagePayload
 from photobox.models.PrintMode import PrintMode
@@ -26,19 +27,22 @@ class Render:
         self.images = images
 
     def start(self):
+        total_image_copies = 0
         for i, item in enumerate(self.images):
-            logger.info(f"Processing image {i + 1}/{len(self.images)}...")
+            logger.info(f"Processing image {i + 1}/{len(self.images)}, copies: {item.quantity}")
+            if item.quantity > 1:
+                total_image_copies += item.quantity
             try:
                 self.process(item)
                 logger.info(f"Image {i + 1}/{len(self.images)} processed")
             except Exception as e:
                 logger.error(f"Exception during rendering image: {item.src.full}, message: {e}", e)
 
-        logger.info(f"All images have been processed: {len(self.images)}")
+        logger.info(f"All images have been processed: {len(self.images)}, total image copies: {total_image_copies}")
 
     def process(self, image_data: ImagePayload):
         image_data.image = self.open_image(self.os_path, image_data.src.full)
-        #original_aspect = image_data.size.height / image_data.size.width
+        # original_aspect = image_data.size.height / image_data.size.width
         if image_data.image.mode != "RGB":
             logger.info(f"Image mode is {image_data.image.mode}, converting to RGB")
             image_data.image = image_data.image.convert('RGB')
@@ -47,17 +51,28 @@ class Render:
         image_data.image = self.resize(image_data)
         image_data.image = self.draw_border(image_data)
 
-        original_filename = os.path.basename(image_data.src.full)
+        for i in range(2):
+            self.save_image(image_data, i)
+
+    def save_image(self, image_data, copy):
+        # get full image url
+        original_filename = os.path.basename(image_data.src.full).replace(".jpg", "")
+        # create unique salt
         salt = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
-        file = f"{original_filename}-{salt}-{image_data.size.width}-{image_data.size.height}.jpg"
+        # create file name
+        file = f"{original_filename}-{salt}-{image_data.size.width}-{image_data.size.height}"
+        if copy > 0:
+            file += f"-copy-{copy}"
+        file += ".jpg"
+        # create destination file path using bas OS and target relative path
+        path = os.path.normpath(os.path.join(self.os_path, image_data.target_path))
+        # join file path and file name, normalize url
+        file_path = os.path.normpath(os.path.join(path, file))
 
-        path = os.path.join(self.os_path, image_data.target_path)
-        file_path = os.path.join(path, file)
-
-        logger.info(f"Save image as {file_path}")
-        #logger.info(f"Aspect ratio of the final image is: {   image_data.image.height / image_data.image.width}, required: {original_aspect}")
+        logger.info(f"Saving image as {file_path}")
+        # create directory if it doesn't exist
         if not os.path.exists(path):
-            logger.info(f"Path doesn't exist, creating one: {path}")
+            logger.info(f"Path doesn't exist, creating it: {path}")
             os.makedirs(path)
         image_data.image.convert("RGB").save(file_path, "JPEG", dpi=(600, 600))
 
@@ -85,8 +100,7 @@ class Render:
 
         return Color.adjust_color(image_data.image, image_data.color_adjustment)
 
-    @staticmethod
-    def resize(image_data: ImagePayload):
+    def resize(self, image_data: ImagePayload):
         logger.info(f"Resize image according to format. Mode: {image_data.image_print_mode}, "
                     f"format: {image_data.size}, "
                     f"crop data: {image_data.crop_data_for_render}, "
@@ -100,9 +114,26 @@ class Render:
             # if crop data is present
             # crop using it, otherwise perform auto crop
             if image_data.crop_data_for_render:
-                return Cropper.crop(image_data.image, image_data.crop_data_for_render, image_data.size)
+                crop_data_for_render = self.check_and_convert_render_data(image_data)
+                return Cropper.crop(image_data.image, crop_data_for_render, image_data.size)
             else:
                 return Cropper.auto_crop_best_frame(image_data.image, image_data.size)
+
+    def check_and_convert_render_data(self, image_data: ImagePayload) -> Area:
+        if image_data.crop_data_for_render.width == 0 and image_data.crop_data_for_render.height == 0:
+            logger.warning(f"Render data is present but doesn't have real values, data will be created using thumbnail")
+            thumbnail = self.open_image(self.os_path, image_data.src.thumbnail)
+            logger.info(f"Thumbnail size: {thumbnail.width}, {thumbnail.height}")
+            thumbnail_width = thumbnail.width
+            thumbnail_height = thumbnail.height
+            render_data = {
+                'width': image_data.crop_data.width / thumbnail_width * 100,
+                'x': image_data.crop_data.x / thumbnail_width * 100,
+                'height': image_data.crop_data.height / thumbnail_height * 100,
+                'y': image_data.crop_data.y / thumbnail_height * 100,
+            }
+            return Area(render_data['x'], render_data['y'], render_data['width'], render_data['height'])
+        return image_data.crop_data_for_render
 
     @staticmethod
     def draw_border(image_data: ImagePayload):
@@ -131,5 +162,3 @@ class Render:
         file_path = f"{os_path}{relative_path}{filename}"
         image.save(file_path)
         return f"/{relative_path}{filename}"
-
-

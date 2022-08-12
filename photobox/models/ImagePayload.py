@@ -26,6 +26,7 @@ class ImagePayload:
     rotate: int
     size: Size
     src: Src
+    crop_data: Area
     image: Image = Image
     target_path: str = ""
     crop_data_for_render: Optional[Area] = None

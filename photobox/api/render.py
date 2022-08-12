@@ -46,15 +46,11 @@ class PhotoProcessingAPI(Resource):
         json_data = request.get_json(force=True)
         image_payload: [ImagePayload] = ImagePayload.schema().loads(json.dumps(json_data), many=True)
         logger.info(f"Got request for render images, quantity: {len(image_payload)}, host: {host}")
-        #try:
-            #Render(image_payload, image_path).start()
         logger.info(f"The job has been scheduled, images are processing in the background")
+
         thread = threading.Thread(target=process_images, args=[image_payload, image_path])
         thread.daemon = True
         thread.start()
-        #except Exception as e:
-            #logger.error(f"Exception during rendering images: {e}")
-            #return {"message": "Can't finish rendering, the error occurred on server side"}, 400
         return json_data, 200
 
 
