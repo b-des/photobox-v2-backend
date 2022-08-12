@@ -51,8 +51,8 @@ class Render:
         image_data.image = self.resize(image_data)
         image_data.image = self.draw_border(image_data)
 
-        for i in range(image_data.quantity):
-            self.save_image(image_data, i)
+        #for i in range(image_data.quantity):
+        self.save_image(image_data, 0)
 
     def save_image(self, image_data, copy):
         # get full image url
