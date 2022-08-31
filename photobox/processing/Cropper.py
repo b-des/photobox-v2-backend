@@ -3,6 +3,7 @@ import smartcrop
 
 from photobox import utils
 from photobox.models.Area import Area
+from photobox.models.FrameType import FrameType
 from photobox.models.ImagePayload import ImagePayload
 from photobox.models.Size import Size
 
@@ -50,11 +51,16 @@ class Cropper:
 
     @staticmethod
     def fit_to_container(cropper_data: ImagePayload):
-
         frame_thickness = cropper_data.frame.thickness
+
+        if cropper_data.frame.type == FrameType.NONE:
+            frame_thickness = 0
+
         width = utils.to_pixel(cropper_data.size.width - frame_thickness * 2)
         height = utils.to_pixel(cropper_data.size.height - frame_thickness * 2)
 
+        print(width / height)
+        print(cropper_data.size.width / cropper_data.size.height)
         image = cropper_data.image
 
         if image.width > image.height and not cropper_data.rotate:
