@@ -51,10 +51,11 @@ class Cropper:
 
     @staticmethod
     def fit_to_container(cropper_data: ImagePayload):
-        frame_thickness = cropper_data.frame.thickness
+        frame_thickness = 0
 
-        if cropper_data.frame.type == FrameType.NONE:
-            frame_thickness = 0
+        # use frame wight from reqeust only for solid or polaroid frame types
+        if cropper_data.frame.type == FrameType.SOLID or cropper_data.frame.type == FrameType.POLAROID:
+            frame_thickness = cropper_data.frame.thickness
 
         width = utils.to_pixel(cropper_data.size.width - frame_thickness * 2)
         height = utils.to_pixel(cropper_data.size.height - frame_thickness * 2)
