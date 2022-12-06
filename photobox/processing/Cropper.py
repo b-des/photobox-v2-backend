@@ -1,3 +1,6 @@
+import json
+import logging
+
 from PIL import Image
 import smartcrop
 
@@ -44,8 +47,8 @@ class Cropper:
             result = sc.crop(image, size.height, size.width)
         else:
             result = sc.crop(image, size.width, size.height)
-        x, y, width, height = result['top_crop']['x'], result['top_crop']['y'], \
-                              result['top_crop']['width'], result['top_crop']['height']
+        x, y, width, height = result['crops'][0]['x'], result['crops'][0]['y'], \
+                              result['crops'][0]['width'], result['crops'][0]['height']
 
         return Cropper.resize(image.crop((x, y, x + width, y + height)), size)
 

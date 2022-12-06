@@ -116,6 +116,7 @@ class Render:
                 crop_data_for_render = self.check_and_convert_render_data(image_data)
                 return Cropper.crop(image_data.image, crop_data_for_render, image_data.size)
             else:
+                logger.info(f"Detect and crop best frame automatically, url: {image_data.src.full}")
                 return Cropper.auto_crop_best_frame(image_data.image, image_data.size)
 
     def check_and_convert_render_data(self, image_data: ImagePayload) -> Area:
